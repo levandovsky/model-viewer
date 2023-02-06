@@ -3,35 +3,29 @@ import {
   Environment,
   Html,
   OrthographicCamera,
-  Plane
+  Plane,
 } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import { ARButton as ThreeARButton, XR } from "@react-three/xr";
 import CamControls from "camera-controls";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Scene } from "three";
 import { USDZExporter } from "three/examples/jsm/exporters/USDZExporter";
 import "./App.css";
 import { Model as DeluxeXl, NodeConfig } from "./models/deluxe-xl/Scene";
 
 const {
-  ACTION: {
-    TOUCH_DOLLY_ROTATE,
-    TOUCH_ROTATE,
-    NONE
-  }
+  ACTION: { TOUCH_DOLLY_ROTATE, TOUCH_ROTATE, NONE },
 } = CamControls;
-
 
 const isXRSupported = async (mode: XRSessionMode) => {
   if (!navigator.xr) return false;
 
   return navigator.xr.isSessionSupported(mode);
 };
+const angleToRadian = (angle: number) => angle * (Math.PI / 180);
 
 const exporter = new USDZExporter();
-
-const angleToRadian = (angle: number) => angle * (Math.PI / 180);
 
 const shownNodes: NodeConfig[] = [
   {
@@ -52,17 +46,24 @@ const shownNodes: NodeConfig[] = [
   },
 ];
 
-const downloadUSDZ = async (scene: Scene) => {
+const viewUSDZ = async (scene: Scene) => {
   const result = await exporter.parse(scene);
   const blob = new Blob([result], { type: "application/octet-stream" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
+
+  if (!a.relList.supports("ar")) return;
+
   a.style.display = "none";
   a.href = url;
-  a.download = "model.usdz";
+  a.rel = "ar";
+  a.download = "deluxe-xl.usdz";
+  const imageElement = document.createElement("img");
+  a.appendChild(imageElement);
   document.body.appendChild(a);
   a.click();
-  window.URL.revokeObjectURL(url);
+  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 };
 
 const ARButton = () => {
@@ -83,9 +84,8 @@ const ARButton = () => {
   return (
     <Html as="div" wrapperClass="test">
       <button
-        type="button"
         onClick={() => {
-          downloadUSDZ(scene);
+          viewUSDZ(scene);
         }}
       >
         View AR
