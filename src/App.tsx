@@ -14,6 +14,8 @@ import { USDZExporter } from "three/examples/jsm/exporters/USDZExporter";
 import "./App.css";
 import { Model as DeluxeXl, NodeConfig } from "./models/deluxe-xl/Scene";
 
+const isSafari = navigator.userAgent.includes("Safari");
+
 const {
   ACTION: { TOUCH_DOLLY_ROTATE, TOUCH_ROTATE, NONE },
 } = CamControls;
@@ -52,16 +54,19 @@ const viewUSDZ = async (scene: Scene) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
 
-  if (!a.relList.supports("ar")) return;
-
   a.style.display = "none";
   a.href = url;
   a.rel = "ar";
-  a.download = "deluxe-xl.usdz";
-  const imageElement = document.createElement("img");
-  a.appendChild(imageElement);
+  a.download = "model.usdz";
+
+  if (isSafari && a.relList.supports("ar")) {
+    const imageElement = document.createElement("img");
+    a.appendChild(imageElement);
+  }
+
   document.body.appendChild(a);
   a.click();
+
   URL.revokeObjectURL(url);
   document.body.removeChild(a);
 };
