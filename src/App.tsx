@@ -89,6 +89,7 @@ const ARButton = () => {
   return (
     <Html as="div" wrapperClass="test">
       <button
+        type="button"
         onClick={() => {
           viewUSDZ(scene);
         }}
