@@ -106,7 +106,7 @@ export const App = () => {
   return (
     <main>
       <section>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="loading">Loading...</div>}>
           <Canvas shadows>
             <color attach="background" args={["#fff"]} />
             <XR>
