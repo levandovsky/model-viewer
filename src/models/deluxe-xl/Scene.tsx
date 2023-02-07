@@ -210,7 +210,7 @@ export type NodeConfig = {
   material: keyof GLTFResult["materials"];
 };
 
-export function Model(
+export default function Model(
   props: JSX.IntrinsicElements["group"] & {
     shownNodes: NodeConfig[];
   }

@@ -8,11 +8,13 @@ import {
 import { Canvas, useThree } from "@react-three/fiber";
 import { ARButton as ThreeARButton, XR } from "@react-three/xr";
 import CamControls from "camera-controls";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Scene } from "three";
 import { USDZExporter } from "three/examples/jsm/exporters/USDZExporter";
 import "./App.css";
-import { Model as DeluxeXl, NodeConfig } from "./models/deluxe-xl/Scene";
+import type { NodeConfig } from "./models/deluxe-xl/Scene";
+
+const DeluxeXl = lazy(() => import("./models/deluxe-xl/Scene"));
 
 const isSafari = navigator.userAgent.includes("Safari");
 
@@ -87,7 +89,7 @@ const ARButton = () => {
   }
 
   return (
-    <Html as="div" wrapperClass="test">
+    <Html as="div" wrapperClass="ar-button-container">
       <button
         type="button"
         onClick={() => {
@@ -103,51 +105,48 @@ const ARButton = () => {
 export const App = () => {
   return (
     <main>
-      <section
-        style={{
-          width: "100%",
-          height: "50%",
-        }}
-      >
-        <Canvas shadows>
-          <color attach="background" args={["#fff"]} />
-          <XR>
-            <ARButton />
-            <directionalLight
-              castShadow
-              position={[2, 10, 3]}
-              intensity={1}
-              shadow-mapSize={1024}
-            />
-            <DeluxeXl shownNodes={shownNodes} />
-            <Plane
-              receiveShadow
-              rotation={[-Math.PI / 2, 0, 0]}
-              args={[500, 500]}
-            >
-              <shadowMaterial transparent opacity={0.4} />
-            </Plane>
-            <OrthographicCamera />
-            <CameraControls
-              maxPolarAngle={angleToRadian(80)}
-              minPolarAngle={angleToRadian(0)}
-              polarAngle={angleToRadian(60)}
-              azimuthAngle={angleToRadian(-120)}
-              maxZoom={1}
-              minZoom={1}
-              distance={4}
-              maxDistance={4}
-              minDistance={3}
-              dragToOffset={false}
-              touches={{
-                one: TOUCH_ROTATE,
-                two: TOUCH_DOLLY_ROTATE,
-                three: NONE,
-              }}
-            />
-            <Environment preset="warehouse" />
-          </XR>
-        </Canvas>
+      <section>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Canvas shadows>
+            <color attach="background" args={["#fff"]} />
+            <XR>
+              <ARButton />
+              <directionalLight
+                castShadow
+                position={[2, 10, 3]}
+                intensity={1}
+                shadow-mapSize={1024}
+              />
+              <DeluxeXl shownNodes={shownNodes} />
+              <Plane
+                receiveShadow
+                rotation={[-Math.PI / 2, 0, 0]}
+                args={[500, 500]}
+              >
+                <shadowMaterial transparent opacity={0.4} />
+              </Plane>
+              <OrthographicCamera />
+              <CameraControls
+                maxPolarAngle={angleToRadian(80)}
+                minPolarAngle={angleToRadian(0)}
+                polarAngle={angleToRadian(60)}
+                azimuthAngle={angleToRadian(-120)}
+                maxZoom={1}
+                minZoom={1}
+                distance={5}
+                maxDistance={5}
+                minDistance={3}
+                dragToOffset={false}
+                touches={{
+                  one: TOUCH_ROTATE,
+                  two: TOUCH_DOLLY_ROTATE,
+                  three: NONE,
+                }}
+              />
+              <Environment preset="warehouse" />
+            </XR>
+          </Canvas>
+        </Suspense>
       </section>
     </main>
   );
